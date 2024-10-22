@@ -1,0 +1,75 @@
+name: SCA Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - ${{ github.event.repository.default_branch }}
+  pull_request:
+
+jobs:
+  prepare-sca-maven-generation:
+    runs-on: ubuntu-latest
+    container: mozilla/sbt:8u292_1.5.7
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generate dependency tree
+        run: |
+          echo "Generating dependency tree for the root project"
+          sbt "set asciiGraphWidth := 9999" "dependencyTree::toFile maven_dep_tree.txt -f"
+          if [ -f "maven_dep_tree.txt" ]; then
+            echo "Successfully generated maven_dep_tree.txt"
+          else
+            echo "Failed to generate maven_dep_tree.txt"
+          fi
+      - uses: actions/upload-artifact@v3
+        with:
+          name: maven-dep-tree
+          path: "**/maven_dep_tree.txt"
+
+  prepare-the-sca-maven-transformation:
+    needs: prepare-sca-maven-generation
+    runs-on: ubuntu-latest
+    container: python:3.9-bullseye
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: maven-dep-tree
+      - name: Transform dependency tree
+        run: |
+          echo "Download Python Transformation Script"
+          pip3 install argparse
+          curl -O https://raw.githubusercontent.com/r2c-CSE/semgrep-utilities/main/maven/transform2.py
+
+          echo "Generating dependency tree for the root project"
+          python3 transform2.py maven_dep_tree.txt > maven_dep_tree_copy.txt
+          mv maven_dep_tree_copy.txt maven_dep_tree.txt
+          if [ -f "maven_dep_tree.txt" ]; then
+            echo "Successfully generated maven_dep_tree.txt"
+          else
+            echo "Failed to generate maven_dep_tree.txt"
+          fi
+      - uses: actions/upload-artifact@v3
+        with:
+          name: transformed-maven-dep-tree
+          path: "**/maven_dep_tree.txt"
+
+  semgrep-the-sca:
+    needs: prepare-the-sca-maven-transformation
+    runs-on: ubuntu-latest
+    container: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: transformed-maven-dep-tree
+      - name: Run Semgrep
+        env:
+          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
+        run: |
+          semgrep ci --supply-chain --json --output=report-ssc.json
+      - uses: actions/upload-artifact@v3
+        with:
+          name: semgrep-report
+          path: report-ssc.json
