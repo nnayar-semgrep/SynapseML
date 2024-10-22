@@ -1,4 +1,4 @@
-name: SCA Pipeline
+name: Semgrep SCA Pipeline
 
 on:
   workflow_dispatch:
