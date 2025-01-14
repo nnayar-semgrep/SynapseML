@@ -65,7 +65,9 @@ jobs:
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
         run: |
-          semgrep ci --supply-chain --json --output=report-ssc.json
+          ls -lah
+          tree
+          semgrep ci --supply-chain --json --output=report-ssc.json --verbose
       - uses: actions/upload-artifact@v3
         with:
           name: semgrep-report
