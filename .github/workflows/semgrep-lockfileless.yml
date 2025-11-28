@@ -16,6 +16,9 @@ jobs:
         run: |
           ls -lah
           tree
+          java -version
+          sbt --version
+          python3 --version
           semgrep ci --supply-chain --allow-local-builds --verbose --json --output=report-ssc.json || true
       - uses: actions/upload-artifact@v4
         with:
