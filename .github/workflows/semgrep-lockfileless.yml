@@ -7,7 +7,7 @@ on:
 jobs:
   semgrep-the-sca:
     runs-on: ubuntu-latest
-    container: semgrep/semgrep:144.0
+    container: semgrep/semgrep:1.144.0
     steps:
       - uses: actions/checkout@v4
       - name: Run Semgrep SCA Lockfileless
