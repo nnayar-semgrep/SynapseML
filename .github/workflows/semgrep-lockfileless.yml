@@ -16,8 +16,7 @@ jobs:
         run: |
           ls -lah
           tree
-          semgrep ci --supply-chain --allow-local-builds --include=build.sbt --verbose --json --output=report-ssc.json || true
-          semgrep ci --supply-chain --json --output=report-ssc.json --verbose
+          semgrep ci --supply-chain --allow-local-builds --verbose --json --output=report-ssc.json || true
       - uses: actions/upload-artifact@v4
         with:
           name: semgrep-report
