@@ -1,4 +1,4 @@
-name: Semgrep SCA Pipeline
+name: Semgrep SCA Pipeline Lockfileless
 
 on:
   workflow_dispatch:
@@ -10,7 +10,7 @@ jobs:
     container: semgrep/semgrep:144.0
     steps:
       - uses: actions/checkout@v3
-      - name: Run Semgrep
+      - name: Run Semgrep SCA Lockfileless
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
         run: |
