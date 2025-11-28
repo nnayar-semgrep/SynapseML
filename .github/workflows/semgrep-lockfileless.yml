@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     container: semgrep/semgrep:144.0
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Run Semgrep SCA Lockfileless
         env:
           SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
@@ -18,7 +18,7 @@ jobs:
           tree
           semgrep ci --supply-chain --allow-local-builds --include=build.sbt --verbose --json --output=report-ssc.json || true
           semgrep ci --supply-chain --json --output=report-ssc.json --verbose
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: semgrep-report
           path: report-ssc.json
